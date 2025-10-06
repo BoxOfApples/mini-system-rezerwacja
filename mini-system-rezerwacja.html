@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>System Rezerwacji</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #1b1320;
+      color: #fff;
+      padding: 30px;
+    }
+
+    h1 { color: #d698e7; }
+
+    form {
+      background: #2b1f2b;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 400px;
+      box-shadow: 0 0 10px rgba(214,152,231,0.3);
+    }
+
+    label { display: block; margin-top: 10px; }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      margin-top: 4px;
+    }
+
+    button {
+      width: 100%;
+      border-radius: 6px;
+      color: #000;
+      padding: 10px;
+      cursor: pointer;
+      border: none;
+      margin-top: 15px;
+      background-color: #d698e7;
+      font-weight: bold;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #e1b6ef;
+    }
+
+    #msg {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #CDA3E2;
+    }
+
+    #filter {
+      margin-top: 25px;
+      background: #2b1f2b;
+      padding: 15px;
+      border-radius: 10px;
+      max-width: 400px;
+    }
+
+    #list {
+      margin-top: 25px;
+    }
+
+    .item {
+      background: #8f8b8b;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 10px;
+      color: #000;
+    }
+
+    .item span { color: #444; font-size: 14px; }
+
+    .item:hover {
+     background: #c8a2e0;
+     transition: background 0.2s ease;
+     }
+     #count {
+    margin-top: 10px;
+    color: #CDA3E2;
+    font-style: italic;
+   }
+
+
+    
+  </style>
+</head>
+<body>
+
+  <h1>System Rezerwacji</h1>
+
+  <form id="form">
+    <label>Imię:
+      <input type="text" id="name" required>
+    </label>
+    <label>Email:
+      <input type="email" id="email" required>
+    </label>
+    <label>Data:
+      <input type="date" id="data" required>
+    </label>
+    <label>Godzina:
+      <input type="time" id="time" required>
+    </label>
+    <label>Typ usługi:
+      <select id="service" required>
+        <option value="kurs">Kurs komputerowy</option>
+        <option value="konsultacja">Konsultacja</option>
+        <option value="lekcja">Lekcja indywidualna</option>
+      </select>
+    </label>
+    <label>Wiadomość:
+      <textarea id="text" rows="3"></textarea>
+    </label>
+    <button type="submit">Wyślij rezerwację</button>
+  </form>
+
+  <p id="msg"></p>
+
+  <div id="filter">
+    <button id="today">Pokaż tylko dzisiejsze</button>
+    <button id="all">Pokaż wszystkie</button>
+  </div>
+
+  <div id="list"></div>
+
+  <p id="count"></p>
+
+
+  <script>
+    const form = document.getElementById("form");
+    const msg = document.getElementById("msg");
+    const list = document.getElementById("list");
+    const showTodayBtn = document.getElementById("today");
+    const showAllBtn = document.getElementById("all");
+
+    let reservations = [];
+
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const data = document.getElementById("data").value.trim();
+      const time = document.getElementById("time").value.trim();
+      const service = document.getElementById("service").value.trim();
+      const text = document.getElementById("text").value.trim();
+
+      if (new Date(data) < new Date().setHours(0,0,0,0)) {
+        msg.textContent = "Data nie może być z przeszłości.";
+        msg.style.color = "red";
+        return;
+      }
+
+      const reservation = { name, email, data, time, service, text };
+      reservations.push(reservation);
+
+      msg.textContent = `Rezerwacja dodana: ${name} (${email})`;
+      msg.style.color = "#CDA3E2";
+
+      form.reset();
+      renderReservations(reservations);
+    });
+
+    showTodayBtn.addEventListener("click", () => {
+      const today = new Date().toISOString().split("T")[0];
+      const filtered = reservations.filter(r => r.data === today);
+      renderReservations(filtered);
+    });
+
+    showAllBtn.addEventListener("click", () => {
+      renderReservations(reservations);
+    });
+
+    function renderReservations(data) {
+      list.innerHTML = "";
+      data.forEach(r => {
+        const item = document.createElement("div");
+        item.className = "item";
+        item.innerHTML = `
+          <strong>${r.name}</strong> <span>(${r.email})</span><br>
+          ${r.data} o ${r.time} – ${r.service}<br>
+          <em>${r.text}</em>
+        `;
+        list.appendChild(item);
+      });
+
+      const count = document.getElementById("count");
+      count.textContent = `Łącznie rezerwacji: ${data.length}`;
+
+    }
+  </script>
+</body>
+</html>
